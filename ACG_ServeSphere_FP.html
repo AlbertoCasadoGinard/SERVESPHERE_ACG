@@ -1,0 +1,1036 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ServeSphere - Premium Service Marketplace</title>
+
+  <!-- React + Babel -->
+  <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <!-- Lucide icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    :root {
+      --bg-dark: #0F1115;
+      --bg-card: #181B21;
+      --bg-card-hover: #22262e;
+      --text-main: #ffffff;
+      --text-muted: #a0a0a0;
+      --primary-gradient: linear-gradient(135deg, #00F5A0 0%, #9A5BFF 100%);
+      --accent-teal: #00F5A0;
+      --accent-purple: #9A5BFF;
+      --accent-blue: #00D4FF;
+      --danger: #ff4d4d;
+      --font-main: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      --glass: rgba(24, 27, 33, 0.9);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; outline: none; }
+
+    body {
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: var(--font-main);
+      overflow-x: hidden;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    img { max-width: 100%; display: block; object-fit: cover; }
+
+    main { min-height: calc(100vh - 140px); }
+
+    .text-gradient {
+      background: var(--primary-gradient);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .btn {
+      padding: 12px 24px; border-radius: 12px; border: none; cursor: pointer;
+      font-weight: 600; transition: all 0.2s ease; font-size: 0.95rem;
+      display: inline-flex; align-items: center; gap: 8px; justify-content: center;
+    }
+    .btn-sm { padding: 8px 14px; font-size: 0.85rem; border-radius: 8px; }
+
+    .btn-primary {
+      background: var(--accent-teal); color: #000;
+      box-shadow: 0 4px 15px rgba(0, 245, 160, 0.2);
+    }
+    .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(0, 245, 160, 0.4); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; transform: none; box-shadow: none; }
+
+    .btn-secondary { background: #333; color: white; }
+    .btn-secondary:hover { background: #444; }
+    .btn-outline { background: transparent; border: 1px solid rgba(154, 91, 255, 0.5); color: var(--accent-purple); }
+    .btn-outline:hover { background: rgba(154, 91, 255, 0.1); border-color: var(--accent-purple); }
+    .btn-danger-soft { background: rgba(255, 77, 77, 0.1); color: var(--danger); }
+    .btn-danger-soft:hover { background: rgba(255, 77, 77, 0.2); }
+
+    .card {
+      background: var(--bg-card); border-radius: 16px; padding: 24px;
+      border: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+    }
+    .card-interactive:hover {
+      background: var(--bg-card-hover); transform: translateY(-3px);
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2); border-color: rgba(255,255,255,0.1); cursor: pointer;
+    }
+
+    .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px; }
+    .grid-2 { display: grid; grid-template-columns: 1.1fr 1.1fr; gap: 40px; }
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .flex-start { display: flex; align-items: center; gap: 12px; }
+    .flex-col { display: flex; flex-direction: column; gap: 16px; }
+    @media(max-width: 900px) {
+      .grid-2 { grid-template-columns: 1fr; gap: 30px; }
+    }
+
+    nav {
+      position: sticky; top: 0; z-index: 100; background: var(--glass);
+      backdrop-filter: blur(16px); border-bottom: 1px solid rgba(255,255,255,0.05); padding: 16px 0;
+    }
+    .nav-links button {
+      background: none; border: none; color: var(--text-muted);
+      margin-left: 16px; font-size: 0.95rem; cursor: pointer; transition: color 0.2s;
+      font-weight: 600; display: inline-flex; align-items: center; gap: 6px;
+    }
+    .nav-links button:hover, .nav-links button.active { color: var(--text-main); }
+
+    .hero-section {
+      position: relative; padding: 100px 20px 120px; text-align: center;
+      background: linear-gradient(rgba(15, 17, 21, 0.7), var(--bg-dark)), url('https://images.unsplash.com/photo-1600880292203-757bb62b4baf?ixlib=rb-4.0.3&auto=format&fit=crop&w=1920&q=80') center/cover no-repeat;
+    }
+
+    .avatar { width: 64px; height: 64px; border-radius: 16px; object-fit: cover; }
+    .avatar-sm { width: 40px; height: 40px; border-radius: 10px; }
+    .avatar-lg { width: 140px; height: 140px; border-radius: 50%; border: 4px solid var(--bg-dark); }
+
+    .badge {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 4px 10px; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+      text-transform: uppercase; letter-spacing: 0.5px;
+    }
+    .badge-verified { background: rgba(0, 245, 160, 0.1); color: var(--accent-teal); }
+    .badge-pro { background: rgba(154, 91, 255, 0.1); color: var(--accent-purple); }
+
+    .profile-cover {
+      height: 240px; width: 100%; position: relative; margin-bottom: 80px;
+      background-size: cover; background-position: center;
+    }
+    .profile-cover::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(to bottom, transparent, var(--bg-dark));
+    }
+    .profile-avatar-container { position: absolute; bottom: -70px; left: 50%; transform: translateX(-50%); }
+
+    .big-map-container {
+      width: 100%; height: 420px; background: radial-gradient(circle at center, #1a1d24 0%, #0F1115 100%);
+      border-radius: 20px; border: 1px solid rgba(255,255,255,0.1); position: relative; overflow: hidden;
+      box-shadow: inset 0 0 50px rgba(0,0,0,0.5);
+    }
+    .map-dot { cursor: pointer; transition: transform 0.2s; }
+    .map-dot:hover { transform: scale(1.6); }
+    .map-card {
+      position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+      width: 320px; background: var(--glass); backdrop-filter: blur(10px);
+      padding: 15px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.1);
+      animation: slideUp 0.3s ease-out; box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+      z-index: 10;
+    }
+
+    .map-legend {
+      position: absolute;
+      top: 14px;
+      left: 14px;
+      z-index: 3;
+      background: rgba(0,0,0,0.75);
+      border-radius: 14px;
+      padding: 10px 12px;
+      border: 1px solid rgba(255,255,255,0.08);
+      max-width: 260px;
+      font-size: 0.75rem;
+      color: #ccc;
+      backdrop-filter: blur(8px);
+    }
+    .map-legend-title {
+      font-weight: 600;
+      font-size: 0.8rem;
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: #f5f5f5;
+    }
+    .map-legend-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .map-legend-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 4px 8px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.03);
+    }
+
+    .toast {
+      position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
+      background: #222; color: white; padding: 12px 24px; border-radius: 30px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.5); border: 1px solid #333;
+      display: flex; align-items: center; gap: 12px; z-index: 1000; font-weight: 500;
+      animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp {
+      from { bottom: 10px; opacity: 0; }
+      to { bottom: 30px; opacity: 1; }
+    }
+
+    .input-group { margin-bottom: 18px; }
+    .input-group label {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      font-weight: 600;
+    }
+    .custom-input {
+      width: 100%;
+      background: #101218;
+      border-radius: 10px;
+      border: 1px solid #333;
+      padding: 10px 12px;
+      color: #fff;
+      font-size: 0.95rem;
+    }
+    .custom-input:focus {
+      border-color: var(--accent-teal);
+      box-shadow: 0 0 0 1px rgba(0,245,160,0.2);
+    }
+    .time-slot {
+      background: #101218;
+      border-radius: 999px;
+      border: 1px solid #333;
+      color: #ccc;
+      padding: 8px 14px;
+      cursor: pointer;
+      font-size: 0.85rem;
+      transition: all 0.2s;
+    }
+    .time-slot.selected {
+      background: var(--accent-teal);
+      color: #000;
+      border-color: var(--accent-teal);
+      box-shadow: 0 0 0 1px rgba(0,245,160,0.4);
+    }
+
+    .booking-card {
+      display: flex;
+      gap: 16px;
+      padding: 16px;
+      border-radius: 16px;
+      background: var(--bg-card);
+      border: 1px solid rgba(255,255,255,0.08);
+      margin-bottom: 14px;
+      align-items: flex-start;
+    }
+
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 10px;
+    }
+    .filter-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid rgba(255,255,255,0.12);
+      background: rgba(0,0,0,0.4);
+      font-size: 0.8rem;
+      cursor: pointer;
+      color: #ccc;
+    }
+    .filter-pill.active {
+      border-color: var(--accent-teal);
+      background: rgba(0,245,160,0.1);
+      color: #fff;
+    }
+  </style>
+</head>
+<body>
+<div id="root"></div>
+
+<script type="text/babel" data-presets="env,react">
+  const { useState, useEffect } = React;
+
+  const Icon = ({ name, size = 20, color = "currentColor", strokeWidth = 2 }) => {
+    useEffect(() => {
+      if (window.lucide) window.lucide.createIcons();
+    });
+    return (
+      <i
+        data-lucide={name}
+        style={{ width: size, height: size, color }}
+        data-stroke-width={strokeWidth}
+      ></i>
+    );
+  };
+
+  const CATEGORIES = [
+    { id: 'tutoring',   name: 'Academic Tutors',      icon: 'book-open',  desc: 'Math, Science, Languages & Prep',       cover: 'https://images.unsplash.com/photo-1434030216411-0b793f4b4173?w=500&q=80' },
+    { id: 'cleaning',   name: 'Home Cleaning',        icon: 'sparkles',   desc: 'Standard, Deep Clean & Move-out',      cover: 'https://images.unsplash.com/photo-1581578731548-c64695cc6952?w=500&q=80' },
+    { id: 'babysitting',name: 'Child Care',           icon: 'baby',       desc: 'Verified Sitters & Nannies',           cover: 'https://images.unsplash.com/photo-1489710437720-ebb67ec84dd2?w=500&q=80' },
+    { id: 'fitness',    name: 'Personal Training',    icon: 'dumbbell',   desc: 'Yoga, HIIT, Strength & Nutrition',     cover: 'https://images.unsplash.com/photo-1571019614242-c5c5dee9f50b?w=500&q=80' },
+    { id: 'repairs',    name: 'Repairs & Tech',       icon: 'wrench',     desc: 'Electricians, Plumbers & Tech',        cover: 'https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=500&q=80' },
+    { id: 'beauty',     name: 'Wellness & Beauty',    icon: 'heart',      desc: 'Massage, Hair, Skincare & Nails',      cover: 'https://images.unsplash.com/photo-1616394584738-fc6e612e71b9?w=500&q=80' }
+  ];
+
+  const PROVIDERS = [
+    { id: 1, name: "Sarah Jenkins", role: "Elite Math Tutor", category: "tutoring", trustScore: 98, rating: 4.9, price: 45, verified: true, location: { x: 50, y: 50 }, skills: ["Calculus", "SAT Prep", "Physics"], desc: "MIT graduate with 5+ years of experience. I specialize in breaking down complex concepts into understandable steps.", reviews: 124, avatar: "https://i.pravatar.cc/150?img=47", cover: "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?w=1200&q=80" },
+    { id: 101, name: "James Wilson", role: "Language Expert", category: "tutoring", trustScore: 95, rating: 4.8, price: 35, verified: true, location: { x: 55, y: 50 }, skills: ["Spanish", "French", "ESL"], desc: "Certified linguist helping you master new languages through conversation and cultural immersion.", reviews: 62, avatar: "https://i.pravatar.cc/150?img=12", cover: "https://images.unsplash.com/photo-1543269865-cbf427effbad?w=1200&q=80" },
+    { id: 2, name: "David Chen", role: "Home Cleaning Specialist", category: "cleaning", trustScore: 94, rating: 4.8, price: 30, verified: true, location: { x: 45, y: 55 }, skills: ["Deep Clean", "Eco-friendly", "Organization"], desc: "Meticulous and reliable. We bring our own eco-friendly supplies and focus on details others miss.", reviews: 89, avatar: "https://i.pravatar.cc/150?img=11", cover: "https://images.unsplash.com/photo-1527515637462-cff94eecc1ac?w=1200&q=80" },
+    { id: 201, name: "Sparkle Squad", role: "Move-Out Crew", category: "cleaning", trustScore: 97, rating: 4.9, price: 50, verified: true, location: { x: 42, y: 52 }, skills: ["End of Tenancy", "Steam Cleaning"], desc: "Specialized team for heavy duty cleaning. We guarantee your deposit back with our move-out standard.", reviews: 156, avatar: "https://i.pravatar.cc/150?img=32", cover: "https://images.unsplash.com/photo-1584622050111-993a426fbf0a?w=1200&q=80" },
+    { id: 3, name: "Elena Rodriguez", role: "Certified Nanny (CPR)", category: "babysitting", trustScore: 99, rating: 5.0, price: 40, verified: true, location: { x: 55, y: 45 }, skills: ["Newborn Care", "Toddlers", "First Aid"], desc: "Former pediatric nurse with a passion for child development. I provide a safe, engaging environment.", reviews: 210, avatar: "https://i.pravatar.cc/150?img=45", cover: "https://images.unsplash.com/photo-1602542165989-968159121e33?w=1200&q=80" },
+    { id: 401, name: "Jake Fitness", role: "HIIT & Strength Coach", category: "fitness", trustScore: 96, rating: 5.0, price: 60, verified: true, location: { x: 20, y: 80 }, skills: ["Weight Loss", "Muscle Gain", "Meal Plans"], desc: "Transform your body in 90 days. I offer high-intensity training and personalized nutrition plans.", reviews: 92, avatar: "https://i.pravatar.cc/150?img=13", cover: "https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=1200&q=80" },
+    { id: 4, name: "Marcus Thorne", role: "Master Electrician", category: "repairs", trustScore: 96, rating: 4.9, price: 85, verified: true, location: { x: 60, y: 60 }, skills: ["Smart Home", "Rewiring", "Diagnostics"], desc: "Licensed master electrician. From complex panel upgrades to smart home installations.", reviews: 150, avatar: "https://i.pravatar.cc/150?img=60", cover: "https://images.unsplash.com/photo-1621905251189-08b45d6a269e?w=1200&q=80" },
+    { id: 601, name: "Luxe Mobile Salon", role: "Hair Stylist", category: "beauty", trustScore: 95, rating: 4.8, price: 65, verified: true, location: { x: 30, y: 30 }, skills: ["Cuts", "Color", "Styling"], desc: "Professional salon experience in your home. Specializing in modern cuts and color correction.", reviews: 140, avatar: "https://i.pravatar.cc/150?img=20", cover: "https://images.unsplash.com/photo-1560869713-7d0a29430803?w=1200&q=80" },
+    { id: 602, name: "Serenity Mobile Spa", role: "Luxury Wellness Specialist", category: "beauty", trustScore: 99, rating: 5.0, price: 95, verified: true, location: { x: 35, y: 35 }, skills: ["Deep Tissue", "Aromatherapy", "Hot Stone"], desc: "The ultimate luxury spa experience in your own home. I bring a professional heated table, premium oils, and ambient soundscapes to create a total sanctuary.", reviews: 205, avatar: "https://i.pravatar.cc/150?img=9", cover: "https://images.unsplash.com/photo-1540555700478-4be289fbecef?w=1200&q=80" }
+  ];
+
+  const categoryColors = {
+    tutoring:   '#00F5A0',
+    cleaning:   '#00D4FF',
+    babysitting:'#FF5AA5',
+    fitness:    '#FFB545',
+    repairs:    '#FFD447',
+    beauty:     '#9A5BFF'
+  };
+
+  const Badge = ({ text, type }) => (
+    <span className={`badge ${type === 'verified' ? 'badge-verified' : 'badge-pro'}`}>
+      <Icon name={type === 'verified' ? 'shield-check' : 'award'} size={12} strokeWidth={3}/> {text}
+    </span>
+  );
+
+  const Notification = ({ msg }) => (
+    <div className="toast">
+      <Icon name="check-circle-2" color="var(--accent-teal)" size={24} />
+      {msg}
+    </div>
+  );
+
+  const InteractiveMap = ({ providers, onSelect, userLocation = {x: 50, y: 50} }) => {
+    const [activeId, setActiveId] = useState(null);
+    const activeProvider = providers.find(p => p.id === activeId);
+
+    return (
+      <div className="big-map-container">
+        <div style={{position:'absolute', inset:0, background:'radial-gradient(circle, transparent 20%, #0F1115 80%)', zIndex:1}}></div>
+
+        <svg width="100%" height="100%" viewBox="0 0 100 100" style={{position:'absolute', zIndex:2}}>
+          <circle cx="50" cy="50" r="12" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.4">
+            <animate attributeName="stroke-opacity" values="0.05;0.15;0.05" dur="4s" repeatCount="indefinite" />
+          </circle>
+          <circle cx="50" cy="50" r="28" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.35"/>
+          <circle cx="50" cy="50" r="44" fill="none" stroke="rgba(255,255,255,0.05)" strokeWidth="0.3"/>
+
+          <g>
+            <line x1="50" y1="50" x2="50" y2="6"
+                  stroke="rgba(0,245,160,0.4)" strokeWidth="0.5">
+              <animateTransform attributeName="transform"
+                                type="rotate"
+                                from="0 50 50"
+                                to="360 50 50"
+                                dur="8s"
+                                repeatCount="indefinite" />
+            </line>
+          </g>
+
+          <circle cx={userLocation.x} cy={userLocation.y} r="2" fill={categoryColors.tutoring}>
+            <animate attributeName="r" values="2;4;2" dur="2s" repeatCount="indefinite"/>
+            <animate attributeName="opacity" values="1;0.5;1" dur="2s" repeatCount="indefinite"/>
+          </circle>
+
+          {providers.map(p => {
+            const isSelected = activeId === p.id;
+            const color = categoryColors[p.category] || "var(--accent-purple)";
+            return (
+              <g
+                key={p.id}
+                className="map-dot"
+                role="button"
+                aria-label={p.name}
+                onClick={() => setActiveId(p.id)}
+                onMouseEnter={() => setActiveId(p.id)}
+              >
+                {isSelected && (
+                  <circle
+                    cx={p.location.x}
+                    cy={p.location.y}
+                    r="3.7"
+                    fill="none"
+                    stroke={color}
+                    strokeWidth="0.4"
+                    opacity="0.6"
+                  >
+                    <animate
+                      attributeName="r"
+                      values="3.7;7;3.7"
+                      dur="1.6s"
+                      repeatCount="indefinite"
+                    />
+                    <animate
+                      attributeName="opacity"
+                      values="0.7;0;0.7"
+                      dur="1.6s"
+                      repeatCount="indefinite"
+                    />
+                  </circle>
+                )}
+
+                <circle
+                  cx={p.location.x}
+                  cy={p.location.y}
+                  r={isSelected ? 3.4 : 2.3}
+                  fill={isSelected ? "#ffffff" : color}
+                  stroke={isSelected ? color : "none"}
+                  strokeWidth={0.6}
+                />
+              </g>
+            );
+          })}
+
+          {providers.length === 0 && (
+            <text x="50" y="52" fill="#777" fontSize="4" textAnchor="middle">
+              No categories selected
+            </text>
+          )}
+        </svg>
+
+        {activeProvider && (
+          <div className="map-card">
+            <div className="flex-start" style={{marginBottom:'8px'}}>
+              <img src={activeProvider.avatar} className="avatar-sm" alt={activeProvider.name} style={{borderRadius:'50%'}}/>
+              <div>
+                <h4 style={{margin:0}}>{activeProvider.name}</h4>
+                <small style={{color:'var(--accent-teal)'}}>{activeProvider.role}</small>
+              </div>
+            </div>
+            <p style={{fontSize:'0.8rem', color:'#ccc', marginBottom:'8px', lineHeight:1.4}}>
+              {activeProvider.desc.slice(0,80)}...
+            </p>
+            <div className="flex-between" style={{marginTop:'4px'}}>
+              <span style={{fontWeight:'bold'}}>${activeProvider.price}/hr</span>
+              <button
+                className="btn-primary"
+                style={{padding:'4px 10px', fontSize:'0.75rem', borderRadius:'6px'}}
+                onClick={() => onSelect && onSelect(activeProvider)}
+              >
+                View profile
+              </button>
+            </div>
+          </div>
+        )}
+
+        <div className="map-legend">
+          <div className="map-legend-title">
+            <Icon name="radio-tower" size={13} /> Services around you
+          </div>
+          <div className="map-legend-list">
+            {CATEGORIES.map(cat => (
+              <div key={cat.id} className="map-legend-pill">
+                <span style={{
+                  width:8,
+                  height:8,
+                  borderRadius:'50%',
+                  background: categoryColors[cat.id] || '#999'
+                }}></span>
+                <span>{cat.name}</span>
+              </div>
+            ))}
+          </div>
+          <div style={{marginTop:'6px', fontSize:'0.68rem', opacity:0.8}}>
+            Center dot = you. Colored dots = verified providers.
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const Navbar = ({ navigate, currentView, userAvatar }) => (
+    <nav>
+      <div className="container flex-between">
+        <div className="flex-start" style={{cursor: 'pointer'}} onClick={() => navigate('home')}>
+          <div style={{width: 36, height: 36, background: 'var(--primary-gradient)', borderRadius: '10px', display:'flex', alignItems:'center', justifyContent:'center', boxShadow:'0 4px 12px rgba(0, 245, 160, 0.3)'}}>
+            <Icon name="layers" color="white" size={22} strokeWidth={2.5} />
+          </div>
+          <h2 style={{fontWeight: 800, letterSpacing: '-0.5px', fontSize:'1.4rem'}}>ServeSphere</h2>
+        </div>
+        <div className="nav-links flex-start">
+          <button
+            className={currentView === 'home' ? 'active' : ''}
+            onClick={() => navigate('home')}
+          >
+            <Icon name="home" size={18}/> Home
+          </button>
+          <button
+            className={currentView === 'explore' ? 'active' : ''}
+            onClick={() => navigate('explore')}
+          >
+            <Icon name="compass" size={18}/> Explore
+          </button>
+          <button
+            className={currentView === 'dashboard' ? 'active' : ''}
+            onClick={() => navigate('dashboard')}
+          >
+            <Icon name="user" size={18}/> Profile & Bookings
+          </button>
+          <img
+            src={userAvatar}
+            className="avatar-sm"
+            style={{marginLeft:'12px', border:'2px solid #333', cursor:'pointer'}}
+            onClick={() => navigate('dashboard')}
+            alt="User Profile"
+          />
+        </div>
+      </div>
+    </nav>
+  );
+
+  const Home = ({ navigate }) => (
+    <div>
+      <div className="hero-section">
+        <div style={{display:'inline-flex', alignItems:'center', gap:'8px', padding:'6px 16px', borderRadius:'20px', background:'rgba(255,255,255,0.1)', backdropFilter:'blur(10px)', marginBottom:'24px', fontSize:'0.9rem', color:'var(--accent-teal)', fontWeight:600}}>
+          <Icon name="shield-check" size={16}/> Verified Experts at Your Doorstep
+        </div>
+        <h1 style={{fontSize: '4rem', marginBottom: '24px', lineHeight: 1.1, fontWeight: 800, textShadow:'0 2px 10px rgba(0,0,0,0.5)'}}>
+          Book Local Pros.<br /> <span className="text-gradient">Trusted & Secure.</span>
+        </h1>
+        <p style={{color: '#ccc', maxWidth: '600px', margin: '0 auto 40px', fontSize: '1.2rem', lineHeight: 1.6, textShadow:'0 1px 4px rgba(0,0,0,0.5)'}}>
+          Instant access to top-rated professionals. We handle the vetting so you can book with absolute confidence.
+        </p>
+        <div style={{display: 'flex', gap: '16px', justifyContent: 'center'}}>
+          <button className="btn btn-primary" style={{padding:'14px 32px', fontSize:'1rem'}} onClick={() => navigate('explore')}>
+            Explore Services <Icon name="arrow-right" size={20} />
+          </button>
+        </div>
+      </div>
+
+      <div className="container" style={{paddingBottom:'80px', marginTop:'-40px', position:'relative', zIndex:2}}>
+        <div className="flex-between" style={{marginBottom: '20px', padding:'0 10px'}}>
+          <h3>Popular Services</h3>
+          <button className="btn-outline btn-sm" onClick={() => navigate('explore')}>View All <Icon name="chevron-right" size={16}/></button>
+        </div>
+        <div className="grid-3">
+          {CATEGORIES.slice(0,3).map(cat => (
+            <div key={cat.id} className="card card-interactive" onClick={() => navigate('providerList', {category: cat})} style={{padding:0, overflow:'hidden'}}>
+              <div style={{height:'140px', background:`url(${cat.cover}) center/cover`}}></div>
+              <div style={{padding:'20px'}}>
+                <div className="flex-start" style={{marginBottom:'12px'}}>
+                  <Icon name={cat.icon} size={24} color="var(--accent-teal)" />
+                  <h3 style={{margin:0}}>{cat.name}</h3>
+                </div>
+                <p style={{color: 'var(--text-muted)', fontSize: '0.95rem'}}>{cat.desc}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+
+  const CategoryExplorer = ({ navigate }) => {
+    const [activeFilters, setActiveFilters] = useState(CATEGORIES.map(c=>c.id));
+
+    const toggleFilter = (id) => {
+      setActiveFilters(prev =>
+        prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+      );
+    };
+
+    const selectAll = () => setActiveFilters(CATEGORIES.map(c=>c.id));
+    const clearAll = () => setActiveFilters([]);
+
+    const visibleProviders = PROVIDERS.filter(p => activeFilters.includes(p.category));
+
+    return (
+      <div className="container" style={{paddingTop: '40px', paddingBottom:'60px'}}>
+        <div className="flex-between" style={{marginBottom:'10px'}}>
+          <div>
+            <h1 style={{marginBottom:'8px'}}>Explore Services</h1>
+            <p style={{color:'var(--text-muted)'}}>Choose a category or use the radar map to discover trusted providers around you.</p>
+          </div>
+        </div>
+
+        <div className="grid-2">
+          <div>
+            <h3 style={{marginBottom:'16px', display:'flex', alignItems:'center', gap:'8px'}}>
+              <Icon name="grid-3x3" size={18} /> Browse by category
+            </h3>
+            <div className="grid-3">
+              {CATEGORIES.map(cat => (
+                <div
+                  key={cat.id}
+                  className="card card-interactive"
+                  onClick={() => navigate('providerList', {category: cat})}
+                  style={{padding:'18px', display:'flex', alignItems:'center', gap:'14px'}}
+                >
+                  <div style={{
+                    color: categoryColors[cat.id] || 'var(--accent-purple)',
+                    background:`${(categoryColors[cat.id] || '#9A5BFF')}20`,
+                    width:'50px', height:'50px',
+                    borderRadius:'16px',
+                    display:'flex', alignItems:'center', justifyContent:'center'
+                  }}>
+                    <Icon name={cat.icon} size={24} strokeWidth={1.7} />
+                  </div>
+                  <div>
+                    <h4 style={{marginBottom:'4px'}}>{cat.name}</h4>
+                    <p style={{color:'var(--text-muted)', fontSize:'0.83rem', lineHeight:1.4}}>{cat.desc}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h3 style={{marginBottom:'8px', display:'flex', alignItems:'center', gap:'8px'}}>
+              <Icon name="radio-tower" size={18} /> All services near you
+            </h3>
+            <p style={{color:'var(--text-muted)', fontSize:'0.85rem', marginBottom:'6px'}}>
+              Filter by service type and see who is around you in real time.
+            </p>
+
+            <div className="filter-bar">
+              <button
+                type="button"
+                className={`filter-pill ${activeFilters.length === CATEGORIES.length ? 'active' : ''}`}
+                onClick={selectAll}
+              >
+                <Icon name="check-circle-2" size={14} /> All
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${activeFilters.length === 0 ? 'active' : ''}`}
+                onClick={clearAll}
+              >
+                <Icon name="x-circle" size={14} /> None
+              </button>
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat.id}
+                  type="button"
+                  className={`filter-pill ${activeFilters.includes(cat.id) ? 'active' : ''}`}
+                  onClick={() => toggleFilter(cat.id)}
+                >
+                  <span style={{
+                    width:8,
+                    height:8,
+                    borderRadius:'50%',
+                    background: categoryColors[cat.id] || '#888'
+                  }}></span>
+                  {cat.name}
+                </button>
+              ))}
+            </div>
+
+            <InteractiveMap
+              providers={visibleProviders}
+              onSelect={(p) => navigate('profile', {provider: p})}
+              userLocation={{x:50, y:50}}
+            />
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const ProviderList = ({ category, navigate }) => {
+    const list = PROVIDERS.filter(p => !category || p.category === category.id);
+
+    return (
+      <div className="container" style={{paddingTop: '40px', paddingBottom:'60px'}}>
+        <div className="flex-between" style={{marginBottom: '30px'}}>
+          <div>
+            <button onClick={() => navigate('explore')} style={{background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px', marginBottom:'10px'}}><Icon name="arrow-left" size={16}/> Back to Explore</button>
+            <h1>{category ? category.name : 'All Providers'}</h1>
+          </div>
+        </div>
+
+        {list.length === 0 ? (
+          <div className="card" style={{textAlign:'center', padding:'40px'}}>
+            <Icon name="search-x" size={48} color="#444" style={{marginBottom:'20px'}}/>
+            <h3>No providers found yet</h3>
+            <p style={{color:'#aaa'}}>We are onboarding new pros in this category weekly.</p>
+          </div>
+        ) : (
+          <div className="grid-3">
+            {list.map(p => (
+              <div key={p.id} className="card card-interactive" onClick={() => navigate('profile', {provider: p})}>
+                <div className="flex-between" style={{alignItems:'flex-start', marginBottom:'16px'}}>
+                  <div className="flex-start">
+                    <img src={p.avatar} className="avatar" alt={p.name} />
+                    <div>
+                      <h3 style={{marginBottom:'4px', fontSize:'1.2rem'}}>{p.name}</h3>
+                      <small style={{color: 'var(--accent-teal)', fontWeight:600}}>{p.role}</small>
+                    </div>
+                  </div>
+                  <div style={{textAlign:'right'}}>
+                    <div style={{fontWeight:'800', fontSize:'1.3rem'}}>${p.price}</div>
+                    <small style={{color:'#888'}}>/hr</small>
+                  </div>
+                </div>
+
+                <p style={{fontSize:'0.95rem', color:'#ccc', marginBottom: '16px', lineHeight:'1.5', height:'42px', overflow:'hidden', display:'-webkit-box', WebkitLineClamp:2, WebkitBoxOrient:'vertical'}}>
+                  {p.desc}
+                </p>
+
+                <div style={{display:'flex', gap:'8px', marginBottom:'16px'}}>
+                  <Badge text="Verified" type="verified" />
+                  {p.trustScore > 95 && <Badge text="Elite" type="pro" />}
+                </div>
+
+                <div style={{paddingTop:'16px', borderTop:'1px solid rgba(255,255,255,0.05)', display:'flex', alignItems:'center', gap:'6px', fontSize:'0.9rem', color:'#aaa'}}>
+                  <Icon name="star" size={16} />
+                  <strong style={{color:'white'}}>{p.rating}</strong> ({p.reviews} reviews)
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  const ProviderProfile = ({ provider, navigate, showNotification }) => {
+    if (!provider) return <div className="container" style={{padding:'40px'}}>Loading...</div>;
+    const categoryObj = CATEGORIES.find(c=>c.id===provider.category);
+
+    return (
+      <div>
+        <div className="profile-cover" style={{backgroundImage: `url(${provider.cover})`}}>
+          <div className="container" style={{position:'relative', height:'100%'}}>
+            <button onClick={() => navigate('providerList', {category: categoryObj})} className="btn-sm btn-secondary" style={{position:'absolute', top:'20px', left:'20px', backdropFilter:'blur(4px)', background:'rgba(0,0,0,0.6)'}}>
+              <Icon name="arrow-left" size={16}/> Back to List
+            </button>
+            <div className="profile-avatar-container">
+              <img src={provider.avatar} className="avatar-lg" alt={provider.name} />
+            </div>
+          </div>
+        </div>
+
+        <div className="container" style={{paddingBottom:'60px'}}>
+          <div style={{textAlign:'center', marginBottom:'30px'}}>
+            <h1 style={{marginBottom:'8px', fontSize:'2rem'}}>{provider.name}</h1>
+            <div style={{color:'var(--accent-teal)', marginBottom:'16px', fontSize:'1.1rem', fontWeight:600}}>{provider.role}</div>
+            <div style={{display:'flex', justifyContent:'center', gap:'10px', flexWrap:'wrap'}}>
+              <Badge text="Identity Verified" type="verified" />
+              <Badge text="Background Checked" type="verified" />
+              {provider.category === "babysitting" && <Badge text="Blockchain ID" type="pro" />}
+            </div>
+          </div>
+
+          <div className="grid-2">
+            <div className="flex-col">
+              <div className="card">
+                <h3 style={{marginBottom:'16px'}}>About</h3>
+                <p style={{lineHeight: '1.7', fontSize: '1rem', color:'#ccc'}}>{provider.desc}</p>
+              </div>
+              <div className="card">
+                <h3 style={{marginBottom:'16px'}}>Expertise</h3>
+                <div style={{display: 'flex', gap: '10px', flexWrap:'wrap'}}>
+                  {provider.skills.map(s => (
+                    <span key={s} style={{background: 'rgba(255,255,255,0.05)', padding: '8px 16px', borderRadius: '8px', fontSize: '0.9rem', border:'1px solid rgba(255,255,255,0.1)', display:'flex', alignItems:'center', gap:'6px'}}>
+                      <Icon name="check-circle-2" size={14} color="var(--accent-teal)"/> {s}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div>
+              <div className="card" style={{position:'sticky', top:'100px', border:'1px solid var(--accent-teal)'}}>
+                <div className="flex-between" style={{marginBottom:'24px', paddingBottom:'20px', borderBottom:'1px solid rgba(255,255,255,0.1)'}}>
+                  <span style={{color:'#aaa', fontSize:'1.1rem'}}>Hourly Rate</span>
+                  <span style={{fontSize:'2rem', fontWeight:'800'}}>${provider.price}</span>
+                </div>
+
+                <div className="flex-col" style={{marginBottom:'24px'}}>
+                  <div className="flex-start" style={{background:'rgba(255,255,255,0.03)', padding:'12px', borderRadius:'10px'}}>
+                    <Icon name="shield-check" color="var(--accent-teal)" size={20} />
+                    <span>ServeSphere Satisfaction Guarantee</span>
+                  </div>
+                  <div className="flex-start" style={{background:'rgba(255,255,255,0.03)', padding:'12px', borderRadius:'10px'}}>
+                    <Icon name="clock" color="var(--accent-purple)" size={20} />
+                    <span>Usually responds in under 1 hour</span>
+                  </div>
+                </div>
+
+                <button className="btn btn-primary" style={{width: '100%', padding:'16px', fontSize:'1.1rem'}} onClick={() => navigate('booking', {provider})}>
+                  Book Now <Icon name="calendar-check" size={20}/>
+                </button>
+                <button
+                  className="btn btn-outline"
+                  style={{width: '100%', marginTop:'12px', padding:'14px'}}
+                  onClick={() => showNotification && showNotification("Secure in-app messaging will be available in the next version. For now, include key details in the booking notes.")}
+                >
+                  <Icon name="message-square" size={18}/> Message Provider
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const BookingView = ({ provider, navigate, addBooking }) => {
+    const [step, setStep] = useState(1);
+    const [date, setDate] = useState('');
+    const [time, setTime] = useState('');
+
+    if (!provider) return <div className="container" style={{padding:'40px'}}>No provider selected.</div>;
+
+    const handleConfirm = () => {
+      addBooking({
+        id: Math.floor(Math.random() * 10000),
+        provider: provider,
+        date, time,
+        status: 'Confirmed'
+      });
+      setStep(2);
+    };
+
+    if (step === 2) return (
+      <div className="container" style={{paddingTop: '100px', textAlign: 'center'}}>
+        <div className="card" style={{maxWidth: '500px', margin: '0 auto', borderTop: '4px solid var(--accent-teal)', padding:'40px'}}>
+          <div style={{color: 'var(--accent-teal)', marginBottom: '24px', background:'rgba(0,245,160,0.1)', width:'80px', height:'80px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', margin:'0 auto 24px'}}>
+            <Icon name="check" size={48} strokeWidth={3} />
+          </div>
+          <h2 style={{marginBottom:'16px'}}>Booking Request Sent!</h2>
+          <p style={{margin: '0 auto 30px', color: '#aaa', maxWidth:'80%'}}>
+            Your request to <strong>{provider.name}</strong> for <strong>{date} at {time}</strong> has been sent. They will confirm shortly.
+          </p>
+          <div style={{display:'flex', gap:'12px', justifyContent:'center'}}>
+            <button className="btn btn-primary" onClick={() => navigate('dashboard')}><Icon name="layout-dashboard"/> Go to Dashboard</button>
+          </div>
+        </div>
+      </div>
+    );
+
+    return (
+      <div className="container" style={{paddingTop: '40px', paddingBottom:'60px'}}>
+        <button onClick={() => navigate('profile', {provider})} style={{background:'none', border:'none', color:'var(--text-muted)', cursor:'pointer', display:'flex', alignItems:'center', gap:'4px', marginBottom:'20px'}}>
+          <Icon name="arrow-left" size={16}/> Back to Profile
+        </button>
+        <h1 style={{marginBottom: '30px'}}>Finalize Booking</h1>
+        <div className="grid-2">
+          <div className="card">
+            <h3 style={{marginBottom:'24px'}}>Select Date & Time</h3>
+
+            <div className="input-group">
+              <label><Icon name="calendar" size={18} color="var(--accent-teal)"/> Date</label>
+              <input type="date" onChange={e => setDate(e.target.value)} className="custom-input" />
+            </div>
+
+            <div className="input-group" style={{marginBottom:'30px'}}>
+              <label><Icon name="clock" size={18} color="var(--accent-teal)"/> Available Slots</label>
+              <div style={{display:'flex', gap:'12px', flexWrap:'wrap'}}>
+                {['09:00 AM', '11:00 AM', '02:00 PM', '04:00 PM'].map(t => (
+                  <button key={t} type="button" onClick={() => setTime(t)} className={`time-slot ${time===t?'selected':''}`}>
+                    {t}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div style={{background:'rgba(255,255,255,0.03)', padding:'24px', borderRadius:'16px', border:'1px solid rgba(255,255,255,0.05)'}}>
+              <div className="flex-between" style={{marginBottom: '12px', color:'#ccc'}}>
+                <span>Hourly Rate</span> <span>${provider.price}</span>
+              </div>
+              <div className="flex-between" style={{marginBottom: '12px', color:'#ccc'}}>
+                <span>Platform Fee (5%)</span> <span>${(provider.price * 0.05).toFixed(2)}</span>
+              </div>
+              <hr style={{borderColor:'rgba(255,255,255,0.1)', margin:'20px 0'}}/>
+              <div className="flex-between" style={{fontWeight:'800', fontSize:'1.4rem'}}>
+                <span>Total Est.</span> <span>${(provider.price * 1.05).toFixed(2)}</span>
+              </div>
+            </div>
+
+            <button className="btn btn-primary" style={{width:'100%', marginTop:'30px', padding:'16px', fontSize:'1.1rem'}} disabled={!date || !time} onClick={handleConfirm}>
+              Confirm & Send Request <Icon name="arrow-right" size={20}/>
+            </button>
+          </div>
+
+          <div className="flex-col">
+            <div className="card" style={{background: 'linear-gradient(135deg, var(--bg-card), rgba(0, 245, 160, 0.05))'}}>
+              <div className="flex-start" style={{marginBottom:'20px'}}>
+                <img src={provider.avatar} className="avatar" alt={provider.name} />
+                <div>
+                  <h3 style={{fontSize:'1.2rem', marginBottom:'4px'}}>{provider.name}</h3>
+                  <small style={{color:'var(--accent-teal)', fontWeight:600}}>{provider.role}</small>
+                </div>
+              </div>
+              <div style={{display:'flex', gap:'16px', fontSize:'0.9rem', color:'#aaa', background:'rgba(0,0,0,0.2)', padding:'12px', borderRadius:'10px', flexWrap:'wrap'}}>
+                <span className="flex-start"><Icon name="map-pin" size={16} color="var(--accent-purple)"/> Local</span>
+                <span className="flex-start"><Icon name="shield-check" size={16} color="var(--accent-teal)"/> Verified</span>
+                <span className="flex-start"><Icon name="star" size={16}/> {provider.rating} Rating</span>
+              </div>
+            </div>
+
+            <div className="card" style={{marginTop:'10px'}}>
+              <h3 style={{marginBottom:'8px'}}>Safety & Guarantee</h3>
+              <p style={{color:'#ccc', fontSize:'0.9rem', lineHeight:1.5}}>
+                ServeSphere verifies providers through identity checks, background screening and ongoing ratings.
+                For sensitive services like childcare, we additionally secure certifications on a tamper-resistant ledger
+                to increase trust and accountability.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  const UserDashboard = ({ user, navigate, showNotification }) => (
+    <div className="container" style={{paddingTop: '40px', paddingBottom:'60px'}}>
+      <div className="flex-between" style={{marginBottom:'40px', alignItems:'flex-end'}}>
+        <div className="flex-start">
+          <img src={user.avatar} className="avatar-lg" style={{width:'80px', height:'80px', border:'3px solid var(--accent-teal)'}} alt="User"/>
+          <div>
+            <h1 style={{marginBottom:'4px'}}>Welcome, {user.name}</h1>
+            <p style={{color:'#aaa'}}>Manage bookings and account settings.</p>
+          </div>
+        </div>
+        <button className="btn btn-primary" onClick={() => navigate('explore')}><Icon name="plus" size={20}/> New Booking</button>
+      </div>
+
+      <div className="grid-2">
+        <div>
+          <h3 style={{marginBottom:'24px', display:'flex', alignItems:'center', gap:'8px'}}><Icon name="calendar-days" color="var(--accent-teal)"/> Your Bookings</h3>
+          {user.bookings.length === 0 ? (
+            <div className="card" style={{textAlign:'center', padding:'60px 20px', borderStyle:'dashed'}}>
+              <Icon name="calendar-x-2" size={48} color="#333" style={{marginBottom:'20px'}} />
+              <h3>No upcoming bookings</h3>
+              <p style={{marginTop:'8px', color:'#aaa', marginBottom:'24px'}}>When you book a service, it will appear here.</p>
+              <button className="btn btn-outline btn-sm" onClick={() => navigate('explore')}>Find a Service</button>
+            </div>
+          ) : (
+            <div className="flex-col">
+              {user.bookings.map(b => (
+                <div key={b.id} className="booking-card">
+                  <img src={b.provider.avatar} className="avatar" alt={b.provider.name} />
+                  <div style={{flex:1}}>
+                    <div className="flex-between" style={{marginBottom:'6px'}}>
+                      <h4 style={{fontSize:'1.1rem'}}>{b.provider.name}</h4>
+                      <span style={{fontSize:'0.75rem', padding:'4px 10px', borderRadius:'6px', background: 'rgba(0,245,160,0.1)', color: 'var(--accent-teal)', fontWeight:600, textTransform:'uppercase', letterSpacing:'0.5px'}}>{b.status}</span>
+                    </div>
+                    <div style={{color:'var(--accent-teal)', fontSize:'0.9rem', fontWeight:600}}>{b.provider.role}</div>
+                    <div style={{display:'flex', gap:'15px', fontSize:'0.9rem', color:'#ccc', marginTop:'10px', background:'rgba(0,0,0,0.2)', padding:'8px 12px', borderRadius:'8px', width:'fit-content'}}>
+                      <span className="flex-start"><Icon name="calendar" size={14}/> {b.date}</span>
+                      <span className="flex-start"><Icon name="clock" size={14}/> {b.time}</span>
+                    </div>
+                  </div>
+                  <div style={{display:'flex', flexDirection:'column', gap:'10px'}}>
+                    <button className="btn-secondary btn-sm" onClick={()=>showNotification("Messaging is coming soon. For now, modify details through your booking.")}><Icon name="message-square" size={14}/> Message</button>
+                    <button className="btn-danger-soft btn-sm"><Icon name="x-circle" size={14}/> Cancel</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        <div>
+          <h3 style={{marginBottom:'24px', display:'flex', alignItems:'center', gap:'8px'}}><Icon name="sliders-horizontal" color="var(--accent-purple)"/> Preferences</h3>
+          <div className="card">
+            <div className="input-group">
+              <label><Icon name="map" size={16}/> Search Radius</label>
+              <div className="flex-between" style={{fontSize:'0.85rem', marginBottom:'8px', color:'#aaa'}}><span>5km</span><span>50km</span></div>
+              <input type="range" style={{width:'100%', accentColor:'var(--accent-teal)'}} />
+            </div>
+
+            <div style={{marginBottom:'24px'}}>
+              <label style={{display:'flex', alignItems:'center', gap:'8px', marginBottom:'16px', fontWeight:600, fontSize:'0.9rem'}}><Icon name="bell" size={16}/> Notifications</label>
+              <div className="flex-col" style={{gap:'12px'}}>
+                <div className="flex-between" style={{background:'rgba(255,255,255,0.03)', padding:'12px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.05)'}}>
+                  <span style={{fontSize:'0.95rem'}}>Booking Updates & Reminders</span>
+                  <input type="checkbox" defaultChecked style={{accentColor:'var(--accent-teal)', transform:'scale(1.2)'}} />
+                </div>
+                <div className="flex-between" style={{background:'rgba(255,255,255,0.03)', padding:'12px', borderRadius:'10px', border:'1px solid rgba(255,255,255,0.05)'}}>
+                  <span style={{fontSize:'0.95rem'}}>Special Offers & News</span>
+                  <input type="checkbox" style={{accentColor:'var(--accent-teal)', transform:'scale(1.2)'}} />
+                </div>
+              </div>
+            </div>
+
+            <button className="btn btn-outline" style={{width:'100%', padding:'14px'}} onClick={()=>showNotification("Preferences updated!")}>
+              Save Preferences
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  const App = () => {
+    const [view, setView] = useState('home');
+    const [selectedCategory, setSelectedCategory] = useState(null);
+    const [selectedProvider, setSelectedProvider] = useState(null);
+    const [notification, setNotification] = useState(null);
+    const [user, setUser] = useState({
+      name: 'Alex',
+      avatar: 'https://i.pravatar.cc/150?img=33',
+      bookings: []
+    });
+
+    const navigate = (newView, params = {}) => {
+      if (params.category) setSelectedCategory(params.category);
+      if (params.provider) setSelectedProvider(params.provider);
+      setView(newView);
+      window.scrollTo(0,0);
+    };
+
+    const showNotification = (msg) => {
+      setNotification(msg);
+      setTimeout(() => setNotification(null), 3000);
+    };
+
+    const addBooking = (booking) => {
+      setUser(prev => ({ ...prev, bookings: [booking, ...prev.bookings] }));
+      showNotification("Booking request sent successfully!");
+    };
+
+    return (
+      <div>
+        <Navbar navigate={navigate} currentView={view} userAvatar={user.avatar} />
+        <main>
+          {view === 'home' && <Home navigate={navigate} />}
+          {view === 'explore' && <CategoryExplorer navigate={navigate} />}
+          {view === 'providerList' && <ProviderList category={selectedCategory} navigate={navigate} />}
+          {view === 'profile' && <ProviderProfile provider={selectedProvider} navigate={navigate} showNotification={showNotification} />}
+          {view === 'booking' && <BookingView provider={selectedProvider} navigate={navigate} addBooking={addBooking} />}
+          {view === 'dashboard' && <UserDashboard user={user} navigate={navigate} showNotification={showNotification} />}
+        </main>
+        {notification && <Notification msg={notification} />}
+        <footer style={{padding: '40px 20px', background: '#0a0b0e', borderTop: '1px solid rgba(255,255,255,0.05)', textAlign: 'center', color: '#666'}}>
+          <p style={{display:'flex', alignItems:'center', justifyContent:'center', gap:'8px'}}><Icon name="globe" size={16}/> © 2025 ServeSphere Inc.</p>
+        </footer>
+      </div>
+    );
+  };
+
+  const root = ReactDOM.createRoot(document.getElementById('root'));
+  root.render(<App />);
+</script>
+</body>
+</html>
